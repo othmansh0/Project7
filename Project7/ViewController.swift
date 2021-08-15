@@ -8,10 +8,12 @@
 import UIKit
 
 class ViewController: UITableViewController {
-    var petitions = [String]()
+    var petitions = [Petition]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        
   
     }
 
