@@ -17,7 +17,7 @@ class ViewController: UITableViewController {
             let urlString = "https://www.hackingwithswift.com/samples/petitions-1.json"
         
         if let url = URL(string: urlString){
-            if let data = try? Data(contentsOf: url){
+            if let data = try? Data(contentsOf: url){//downloading data from server
                 //we're OK to parse
                 parse(json: data)
             }
@@ -30,6 +30,7 @@ class ViewController: UITableViewController {
     func parse(json: Data){
         //dedicated to converting between JSON and Codable objects.
         let decoder = JSONDecoder()
+        
         // asking it to convert our json data into a Petitions object,Petitions.self to refer to the type itself rather than an instance
         if let jsonPetitions = try? decoder.decode(Petitions.self, from: json){
             petitions = jsonPetitions.results
@@ -44,8 +45,9 @@ class ViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
-        cell.textLabel?.text = petitions[indexPath.row].title
-        cell.detailTextLabel?.text = petitions[indexPath.row].body
+        let petition = petitions[indexPath.row]
+        cell.textLabel?.text = petition.title
+        cell.detailTextLabel?.text = petition.body
         return cell
     }
     
