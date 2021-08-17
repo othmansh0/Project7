@@ -21,13 +21,13 @@ class DeatilViewController: UIViewController {
         super.viewDidLoad()
         
         guard let detailItem = detailItem else { return }
-
+        print(detailItem)
         let html = """
         <html>
         <head>
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <style>
-                body { font-size: 150%; }
+                body { font-size: 150%; font-family:arial; }
         </style>
         </head>
         <body>
@@ -36,7 +36,7 @@ class DeatilViewController: UIViewController {
         </html>
         """
         //loading custom html into webView
-        //baseUrl link external resources like pics,javascrit...
+        //baseUrl link external resources like pics,javascript...
         webView.loadHTMLString(html, baseURL: nil)
     }
     
