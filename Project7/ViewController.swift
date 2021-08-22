@@ -46,11 +46,11 @@ class ViewController: UITableViewController {
                     return
                 }
             }
-          
-            
+            //It shows uiSlAlert so we need to push it to the main thread
+            self?.showError()
             
         }
-        showError()
+        
         
       
     }
@@ -94,9 +94,13 @@ class ViewController: UITableViewController {
     }
     
     func showError() {
-        let ac = UIAlertController(title: "Loading error", message: "There was a problem loading the feed; please check your connection and try again.", preferredStyle: .alert)
-        ac.addAction(UIAlertAction(title: "OK", style: .default))
-        present(ac, animated: true)
+        DispatchQueue.main.async {
+            [weak self] in
+            let ac = UIAlertController(title: "Loading error", message: "There was a problem loading the feed; please check your connection and try again.", preferredStyle: .alert)
+            ac.addAction(UIAlertAction(title: "OK", style: .default))
+            self?.present(ac, animated: true)
+        }
+       
     }
     
     
