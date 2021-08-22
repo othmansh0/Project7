@@ -6,6 +6,14 @@
 //
 
 import UIKit
+//All user interface work must occur on the main thread, which is the initial thread your program is created on. If you try to execute code on a different thread, it might work, it might fail to work, it might cause unexpected results, or it might just crash.
+
+//Broadly speaking, if you’re accessing any remote resource, you should be doing it on a background thread – i.e., any thread that is not the main thread
+
+
+// GCD works with a system of queues,First In, First Out (FIFO)
+// GCD calls don't create threads to run in, they just get assigned to one of the existing threads for GCD to manage
+
 
 class ViewController: UITableViewController {
     var petitions = [Petition]()
@@ -13,7 +21,7 @@ class ViewController: UITableViewController {
     var numberOfFilters = 0
     override func viewDidLoad() {
         super.viewDidLoad()
-        //hihuigiugiu
+
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Credits", style: .plain, target: self, action: #selector(showCredits))
         
         navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Filter", style: .plain, target: self, action: #selector(filterPetitions))
@@ -27,16 +35,24 @@ class ViewController: UITableViewController {
             // urlString = "https://api.whitehouse.gov/v1/petitions.json?signatureCountFloor=10000&limit=100"
             urlString = "https://www.hackingwithswift.com/samples/petitions-2.json"
         }
-        
-        if let url = URL(string: urlString){
-            if let data = try? Data(contentsOf: url){//downloading data from server
-                //we're OK to parse
-                parse(json: data)
-                return
+        //Runing loading code in background queue
+        DispatchQueue.global(qos: .userInitiated).async {
+            //making sure there aren’t any strong reference cycles
+            [weak self] in
+            if let url = URL(string: urlString){
+                if let data = try? Data(contentsOf: url){//downloading data from server
+                    //we're OK to parse
+                    self?.parse(json: data)
+                    return
+                }
             }
+          
+            
+            
         }
         showError()
         
+      
     }
     
     @objc func filterPetitions(){
@@ -92,7 +108,13 @@ class ViewController: UITableViewController {
         if let jsonPetitions = try? decoder.decode(Petitions.self, from: json){
             petitions = jsonPetitions.results
             originalPetitions = petitions
-            tableView.reloadData()
+            
+            //it's never OK to do user interface work on the background thread
+            //so we are gonna excute code on main thread
+            //tableView.reloadData()
+            DispatchQueue.main.async{
+                self.tableView.reloadData()
+            }
         }
         
     }
