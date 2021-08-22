@@ -14,6 +14,8 @@ import UIKit
 // GCD works with a system of queues,First In, First Out (FIFO)
 // GCD calls don't create threads to run in, they just get assigned to one of the existing threads for GCD to manage
 
+//When calling async() we provide our work as a closure.
+//This way GCD can make sure that code executes on whichever thread is available.
 
 class ViewController: UITableViewController {
     var petitions = [Petition]()
