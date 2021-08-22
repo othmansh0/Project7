@@ -26,6 +26,13 @@ class ViewController: UITableViewController {
         
         navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Filter", style: .plain, target: self, action: #selector(filterPetitions))
         
+       
+        performSelector(inBackground: #selector(fetchJSON), with: nil)
+        
+      
+    }
+    
+    @objc func fetchJSON(){
         let urlString: String
         
         if navigationController?.tabBarItem.tag == 0 {
@@ -35,24 +42,22 @@ class ViewController: UITableViewController {
             // urlString = "https://api.whitehouse.gov/v1/petitions.json?signatureCountFloor=10000&limit=100"
             urlString = "https://www.hackingwithswift.com/samples/petitions-2.json"
         }
-        //Runing loading code in background queue
-        DispatchQueue.global(qos: .userInitiated).async {
-            //making sure there aren’t any strong reference cycles
-            [weak self] in
+
+       
+            
+    
             if let url = URL(string: urlString){
                 if let data = try? Data(contentsOf: url){//downloading data from server
                     //we're OK to parse
-                    self?.parse(json: data)
+                    parse(json: data)//will be called in background since fetchJSON us called in background
+                    //we need to modify tableView.reloadData in parse function to make it run on main thread
                     return
                 }
             }
-            //It shows uiSlAlert so we need to push it to the main thread
-            self?.showError()
+           
+        performSelector(onMainThread: #selector(showError), with: nil, waitUntilDone: false)
             
-        }
         
-        
-      
     }
     
     @objc func filterPetitions(){
@@ -93,13 +98,13 @@ class ViewController: UITableViewController {
         present(ac,animated: true)
     }
     
-    func showError() {
-        DispatchQueue.main.async {
-            [weak self] in
+   @objc func showError() {
+      
+          
             let ac = UIAlertController(title: "Loading error", message: "There was a problem loading the feed; please check your connection and try again.", preferredStyle: .alert)
             ac.addAction(UIAlertAction(title: "OK", style: .default))
-            self?.present(ac, animated: true)
-        }
+           present(ac, animated: true)
+       
        
     }
     
@@ -116,10 +121,11 @@ class ViewController: UITableViewController {
             //it's never OK to do user interface work on the background thread
             //so we are gonna excute code on main thread
             //tableView.reloadData()
-            DispatchQueue.main.async{
-                self.tableView.reloadData()
-            }
+            tableView.performSelector(onMainThread: #selector(tableView.reloadData), with: nil, waitUntilDone: false)
+        } else{//fetch wont call show error if an error occured while parsing data so we need to call show error here
+            performSelector(onMainThread: #selector(showError), with: nil, waitUntilDone: false)
         }
+        
         
     }
     
